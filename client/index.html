@@ -16,11 +16,23 @@
   <body>
     <div id="main">
       <h1>chatterbox</h1>
+      <form class = "username-form">
+        <label for = "username"> username: </label>
+        <input type="text" class="username" name="username" value="anonymous">
+      </form>
       <div class = "rooms">
-        <select id = "roomSelect">
+        <label for = "roomSelect"> Rooms: </label>
+        <select id = "roomSelect" name = "roomSelect">
         </select>
+
+        <form class = "add-room-form">
+          <input type="text" class="add-room" name="add-room" value="new room">
+          <input type="submit" class="add-room-button" value="Submit">
+        </form>
+
       </div>
       <form class = "send-message">
+        <label for = "message-content"> Message: </label>
         <input type="text" class="message-content" name="message-content">
         <input type="submit" class="submit-button" value="Submit">
       </form>
@@ -28,3 +40,8 @@
     </div>
   </body>
 </html>
+
+
+<!--
+add events
+show messages last to first-->

@@ -1,14 +1,12 @@
 // YOUR CODE HERE:
 // retrieve all the rooms in chatterbox
 
-
 var app = {};
 
 app.server = "https://api.parse.com/1/classes/chatterbox";
 
-
 app.init = function() {
-  app["user"] = window.prompt("What's your name?");  
+  app["user"] = $(".username").val(); //window.prompt("What's your name?");  
   app.fetch(app.getRoomNames);
 };
 
@@ -49,15 +47,15 @@ app.addMessage = function(message) {
 
     var createdAt = document.createElement("span");
 
-/*    var time = moment((new Date()).toJSON()).fromNow();
+    var time = moment(message.createdAt).fromNow();
     time = document.createTextNode(time);
-    createdAt.appendChild(time);*/
+    createdAt.appendChild(time);
     
     messageElement.appendChild(username);
     messageElement.appendChild(messageText);
-    // messageElement.appendChild(createdAt);
+    messageElement.appendChild(createdAt);
     //console.log(message);
-    $("#chats").append(messageElement);
+    $("#chats").prepend(messageElement);
 
 };
 
@@ -71,6 +69,9 @@ app.addRoom = function(roomName) {
 
 app.send = function(message) {
 
+  // create a timestamp for the message
+  message["createdAt"] = (new Date()).toJSON();
+
   $.ajax({
     // This is the url you should use to communicate with the parse API server.
     url: app.server,
@@ -78,6 +79,8 @@ app.send = function(message) {
     data: JSON.stringify(message),
     contentType: 'json',
     success: function() {
+      app.addMessage(JSON.parse(message));
+      //debugger;
       console.log("chaterbox: Message sent");
     },
     error: function () {
@@ -94,11 +97,21 @@ app.showMessages = function(data){
   var filteredData = _.filter(data.results, function(message) { 
     return !!message.hasOwnProperty("roomname") && message.roomname === app.currentRoom; 
   });
+
+  //debugger;
+  filteredData.sort(function(m1, m2) {
+
+    var date1 = new Date(m1.createdAt);
+    var date2 = new Date(m2.createdAt);
+
+    return date1 - date2;
+  });
   
   for (var i = 0; i < filteredData.length; i++){
     
     var message = filteredData[i];
     app.addMessage(message);
+    //debugger;
   }
 };
 
@@ -126,17 +139,29 @@ $(document).ready(function() {
 
   $("#roomSelect").change(function() {
     app.currentRoom = $(this).val();
+    app.clearMessages();
+    app.fetch(app.showMessages);
   });
 
   $(".submit-button").on("click", function(event) {
-  event.preventDefault();
-  console.log("hello");
-  var message = {
-      username: app.user,
-      text: $(".message-content").val(),
-      roomname: app.currentRoom,
-      // createdAt: (new Date()).toJSON()
-    };
+    event.preventDefault();
+    console.log("hello");
+    var message = {
+        username: app.user,
+        text: $(".message-content").val(),
+        roomname: app.currentRoom,
+        // createdAt: (new Date()).toJSON()
+      };
+    app.send(JSON.stringify(message));
+  });
+
+  $(".add-room-button").on("click", function() {
+    event.preventDefault();
+    app.addRoom($(".add-room").val());
+  });
+
+  $(".username").change(function(){
+    app.user = $(".username").val();
   });
 
   app.init();
