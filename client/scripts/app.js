@@ -4,6 +4,8 @@
 
 var app = {};
 
+app.server = "https://api.parse.com/1/classes/chatterbox";
+
 
 app.init = function() {
   app["user"] = window.prompt("What's your name?");  
@@ -27,17 +29,6 @@ app.getRoomNames = function(data){
   app["currentRoom"] = $(".room").val();
 
 };
-
-$(".submit-button").on("click", function(event){
-  event.preventDefault();
-  console.log("hello");
-  var message = {
-      username: app.user,
-      text: $(".message-content").val(),
-      roomname: app.currentRoom,
-      // createdAt: (new Date()).toJSON()
-    };
-});
 
 app.clearMessages = function() {
   _.each($("#chats").children(), function(elem) {
@@ -82,7 +73,7 @@ app.send = function(message) {
 
   $.ajax({
     // This is the url you should use to communicate with the parse API server.
-    url: 'https://api.parse.com/1/classes/chatterbox',
+    url: app.server,
     type: 'POST',
     data: JSON.stringify(message),
     contentType: 'json',
@@ -97,48 +88,28 @@ app.send = function(message) {
   //debugger;
 };
 
-app.showMessage = function(data){
+app.showMessages = function(data){
 
-  var filteredData = [];
-  filteredData = _.filter(data.results, function(message) { 
-    return !!message.hasOwnProperty("roomname");// && message.roomname === app.currentRoom; 
+
+  var filteredData = _.filter(data.results, function(message) { 
+    return !!message.hasOwnProperty("roomname") && message.roomname === app.currentRoom; 
   });
   
-  for (var i = 0; i<filteredData.length; i++){
+  for (var i = 0; i < filteredData.length; i++){
+    
     var message = filteredData[i];
-    
-    var messageElement = document.createElement("div");
-    messageElement.setAttribute("class", "message");
-    
-    var username = document.createElement("h3");
-    username.appendChild(document.createTextNode(message.username));
-
-    var messageText = document.createElement("p");
-    messageText.appendChild(document.createTextNode(message.text));
-
-    var createdAt = document.createElement("span");
-
-    var time = moment(message.createdAt).fromNow();
-    time = document.createTextNode(time);
-    createdAt.appendChild(time);
-    
-
-    messageElement.appendChild(username);
-    messageElement.appendChild(messageText);
-    messageElement.appendChild(createdAt);
-    //console.log(message);
-    $("#chats").append(messageElement);
+    app.addMessage(message);
   }
 };
 
 
 app.fetch = function() {
 
-  var cb = arguments[0] || app.showMessage;
+  var cb = arguments[0] || app.showMessages;
 
   $.ajax({
     // This is the url you should use to communicate with the parse API server.
-    url: 'https://api.parse.com/1/classes/chatterbox',
+    url: app.server,
     type: 'GET',
     //data: JSON.stringify(message),
     contentType: 'jsonp',
@@ -151,8 +122,29 @@ app.fetch = function() {
 
 };
 
-app.init();
-app.fetch();
+$(document).ready(function() {
+
+  $("#roomSelect").change(function() {
+    app.currentRoom = $(this).val();
+  });
+
+  $(".submit-button").on("click", function(event) {
+  event.preventDefault();
+  console.log("hello");
+  var message = {
+      username: app.user,
+      text: $(".message-content").val(),
+      roomname: app.currentRoom,
+      // createdAt: (new Date()).toJSON()
+    };
+  });
+
+  app.init();
+  app.fetch();
+
+});
+
+
 // setInterval(function(){
 //   // update our display of messages
 //   app.fetch();
