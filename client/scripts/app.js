@@ -6,8 +6,9 @@ var app = {};
 app.server = "https://api.parse.com/1/classes/chatterbox";
 
 app.init = function() {
-  app["user"] = $(".username").val(); //window.prompt("What's your name?");  
+  app["user"] = $(".username-field").val(); //window.prompt("What's your name?");  
   app.fetch(app.getRoomNames);
+  app.friends = [];
 };
 
 app.getRoomNames = function(data){
@@ -39,8 +40,19 @@ app.addMessage = function(message) {
     var messageElement = document.createElement("div");
     messageElement.setAttribute("class", "message");
     
+    var usernameLink = document.createElement("a");
+    usernameLink.setAttribute("href", "#");
+   
+
     var username = document.createElement("h3");
     username.appendChild(document.createTextNode(message.username));
+    //debugger;
+    if (_.contains(app.friends, username.innerHTML)){
+      usernameLink.setAttribute("class", "username " + username.innerHTML + " friend");
+    } else {
+       usernameLink.setAttribute("class", "username " + username.innerHTML);
+    }
+    usernameLink.appendChild(username);
 
     var messageText = document.createElement("p");
     messageText.appendChild(document.createTextNode(message.text));
@@ -51,12 +63,11 @@ app.addMessage = function(message) {
     time = document.createTextNode(time);
     createdAt.appendChild(time);
     
-    messageElement.appendChild(username);
+    messageElement.appendChild(usernameLink);
     messageElement.appendChild(messageText);
     messageElement.appendChild(createdAt);
     //console.log(message);
     $("#chats").prepend(messageElement);
-
 };
 
 app.addRoom = function(roomName) {
@@ -113,6 +124,17 @@ app.showMessages = function(data){
     app.addMessage(message);
     //debugger;
   }
+
+  $("a").on("click", function(event){ 
+    //console.log("clicked");
+    var username = $(this)[0].firstChild.innerHTML;
+
+    if (!_.contains(app.friends, username)){
+      app.friends.push(username);
+      //$(this).addClass("friend");
+      $("." + username).addClass("friend");
+    }
+  });
 };
 
 
@@ -143,6 +165,8 @@ $(document).ready(function() {
     app.fetch(app.showMessages);
   });
 
+  
+
   $(".submit-button").on("click", function(event) {
     event.preventDefault();
     console.log("hello");
@@ -160,9 +184,10 @@ $(document).ready(function() {
     app.addRoom($(".add-room").val());
   });
 
-  $(".username").change(function(){
-    app.user = $(".username").val();
+  $(".username-field").change(function(){
+    app.user = $(".username-field").val();
   });
+
 
   app.init();
   app.fetch();

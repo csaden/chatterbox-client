@@ -1,3 +1,10 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+
+
 body {
     background: #eee;
     text-align: center;
@@ -91,4 +98,11 @@ form input[type=text] {
 }
 .message span {
     font-family: Arial;
+}
+.friend {
+    font-size: 20px;
+}
+
+.friend + p{
+    font-weight: bold;
 }
